@@ -87,6 +87,7 @@ void setup()
 void loop()
 {
   if(bluetooth.available()) {
+   
     
  
    
@@ -96,8 +97,14 @@ void loop()
    if(toSend == 'z')
     enabled = 1;
    if(waiting == 0 && enabled == 1 && toSend != 'z'){
-   Serial.println(toSend);
+     
+   char mychar[3];  
+     
+   mychar[0] = toSend;
+   mychar[1] = '.';
+   mychar[2] = '\0';
    
+   bluetooth.print(mychar);
     
      switch(toSend){ //cases
      
@@ -137,7 +144,7 @@ void loop()
          
          sw_door = 1;
        }
-      
+      delay(1500);
       bluetooth.print("done.");
       break;
      
@@ -163,6 +170,7 @@ void loop()
          
          sw_window = 1;
        }
+      delay(1500);
       bluetooth.print("done.");
       break;       
       
@@ -175,6 +183,7 @@ void loop()
         pixels.show(); // This sends the updated pixel color to the hardware.
     
         delay(delayval);
+        delay(1500);
           bluetooth.print("done.");
      break;
      
@@ -257,4 +266,15 @@ void loop()
   }
 
 }
- 
+
+//seonzor
+int readDistanceMediata(int count, int pin) {
+  int sum = 0;
+  for (int i = 0; i<count; i++) {
+    float volts = analogRead(pin) * ((float) 5 / 1024);
+    float distance = 65 * pow(volts, -1.10); 
+    sum = sum + distance;
+    delay(5);
+  } 
+  return (int) (sum/count);
+} 

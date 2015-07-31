@@ -5,14 +5,17 @@
   
   #define ACTIONS_MAX  3
   
-  int actions = 0;
+  int actions_contor = 0;
   
   int bluetoothTx = 2;
   int bluetoothRx = 3;
   
   int initialize = 0;
   int length_str = 0;
-  
+  int actions_nr = 0;//actions string
+  char SavedChar;
+ 
+    
   SoftwareSerial bluetooth(bluetoothTx, bluetoothRx);
   
   byte mac[] = { 
@@ -21,7 +24,9 @@
   
   EthernetServer server(80);
   
-  char url[] = "192.168.1.2";
+  char url[] = "192.168.1.176";
+  
+  EthernetClient client;
   
   void setup() {
     
@@ -55,8 +60,6 @@
   char str[90];
   char get[100]; //get param
   char* stack[10]; // actions list 
-  char actions_string[10]; //actions string
-  
   int stack_count = 0;
   int first_req = 0;
   boolean param = false;
@@ -114,7 +117,6 @@
           //add it to stack
           stack[stack_count++] = str;
          
-          Serial.println(stack_count);
           bluetooth.print(stack[stack_count-1]);//send data, wait for the answer
           
           //clear the char
@@ -147,35 +149,92 @@
            if(toSend != '.' && ((toSend >= 'A' && toSend <= 'Z')||(toSend >= 'a' && toSend <= 'z') || (toSend >= '1' && toSend <= '9'))){ //end
             strcat(get,mychar2);
             length_str++;
+            SavedChar=toSend;
            }    
            else
             make_req = true;
             
             
-        
+            memset(mychar2,0,sizeof(mychar2));
           
          
            if(make_req && first_req == 1){
-            //print array
-           if(length_str < 3 ){
            
-            Serial.println("good");  
+             
+             //print array
+           if(length_str == 1 ){
+             
             
-            //reset string length
-            length_str = 0; 
-            
-            if(actions++ < ACTIONS_MAX){
+            if(actions_contor < ACTIONS_MAX){
+             //Serial.println("good");  
+            Serial.println(actions_contor);
+            actions_contor++;
+            //Serial.println(SavedChar);
+             length_str = 0;
+             
+             if(actions_contor == 1){
+               actions_nr = actions_nr * 10 + (SavedChar - '0');
+               actions_contor = 1; 
+             }
+             
+             if(actions_contor == 2){
+             actions_nr = actions_nr * 10 + (SavedChar - '0');
+             //Serial.println(actions_nr);
+             //clear actions sttringg
+              actions_contor = 2;
               
-              //convert toSend char to string
-              Serial.println(get);
-              strcat(actions_string,get);
-    
-            }else{
-           
-               Serial.print(actions_string);
-                
-            }          
-            
+              char test[5];
+              
+              sprintf(test, "%s%d", "a", actions_nr);
+              
+              char str_cat[10];
+              
+              strcat(str_cat,"GET /search?q=");
+              strcat(str_cat,test);
+              strcat(str_cat," HTTP/1.1");
+              
+               if (client.connect(url, 8080)) {
+                Serial.println("connected");
+                // Make a HTTP request:
+                client.println(str_cat);
+                client.println("Host: www.google.com");
+                client.println("Connection: close");
+                client.println();
+              } 
+              
+             }
+             if(actions_contor == 3){
+               char test[5];
+              
+              
+              sprintf(test, "%s%d", "a", actions_nr);
+              
+              char str_cat[10];
+              
+              strcat(str_cat,"GET /search?q=");
+              strcat(str_cat,test);
+              strcat(str_cat," HTTP/1.1");
+              
+               if (client.connect(url, 8080)) {
+                Serial.println("connected");
+                // Make a HTTP request:
+                client.println(str_cat);
+                client.println("Host: www.google.com");
+                client.println("Connection: close");
+                client.println();
+              } 
+              
+              
+              
+               sprintf(test, "%s%d", "a", actions_nr);
+              
+               actions_nr = 0; 
+               actions_contor = 0;
+               length_str = 0;               
+              
+               
+              }
+            }
            }else{
             
            length_str = 0;
