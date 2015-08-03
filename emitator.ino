@@ -14,7 +14,8 @@
   int length_str = 0;
   int actions_nr = 0;//actions string
   char SavedChar;
- 
+
+  char learning[] = "192.168.1.176";  
     
   SoftwareSerial bluetooth(bluetoothTx, bluetoothRx);
   
@@ -23,10 +24,6 @@
   IPAddress ip(192,168,1,177);
   
   EthernetServer server(80);
-  
-  char url[] = "192.168.1.176";
-  
-  EthernetClient client;
   
   void setup() {
     
@@ -141,7 +138,7 @@
         
            //convert toSend char to string
            char mychar2[2];
-    
+           
         
            mychar2[0] = toSend;
            mychar2[1] = '\0'; //for append
@@ -149,7 +146,6 @@
            if(toSend != '.' && ((toSend >= 'A' && toSend <= 'Z')||(toSend >= 'a' && toSend <= 'z') || (toSend >= '1' && toSend <= '9'))){ //end
             strcat(get,mychar2);
             length_str++;
-            SavedChar=toSend;
            }    
            else
             make_req = true;
@@ -157,85 +153,24 @@
             
             memset(mychar2,0,sizeof(mychar2));
           
-         
-           if(make_req && first_req == 1){
            
-             
-             //print array
-           if(length_str == 1 ){
-             
-            
-            if(actions_contor < ACTIONS_MAX){
-             //Serial.println("good");  
-            Serial.println(actions_contor);
-            actions_contor++;
-            //Serial.println(SavedChar);
-             length_str = 0;
-             
-             if(actions_contor == 1){
-               actions_nr = actions_nr * 10 + (SavedChar - '0');
-               actions_contor = 1; 
-             }
-             
-             if(actions_contor == 2){
-             actions_nr = actions_nr * 10 + (SavedChar - '0');
-             //Serial.println(actions_nr);
-             //clear actions sttringg
-              actions_contor = 2;
-              
-              char test[5];
-              
-              sprintf(test, "%s%d", "a", actions_nr);
-              
-              char str_cat[10];
-              
-              strcat(str_cat,"GET /search?q=");
-              strcat(str_cat,test);
-              strcat(str_cat," HTTP/1.1");
-              
-               if (client.connect(url, 8080)) {
+           if(make_req && first_req == 1){
+            if(length_str == 1){     
+             char get_p[30];
+             memset(get_p,0,sizeof(get_p));
+             strcat(get_p,"GET /?data=");
+             strcat(get_p,get);
+             Serial.println(get_p);
+             strcat(get_p," HTTP/1.1");
+             if (client.connect(learning, 8080)) {
                 Serial.println("connected");
                 // Make a HTTP request:
-                client.println(str_cat);
-                client.println("Host: www.google.com");
+                client.println(get_p);
+                client.println("Host: localhost");
                 client.println("Connection: close");
                 client.println();
-              } 
-              
-             }
-             if(actions_contor == 3){
-               char test[5];
-              
-              
-              sprintf(test, "%s%d", "a", actions_nr);
-              
-              char str_cat[10];
-              
-              strcat(str_cat,"GET /search?q=");
-              strcat(str_cat,test);
-              strcat(str_cat," HTTP/1.1");
-              
-               if (client.connect(url, 8080)) {
-                Serial.println("connected");
-                // Make a HTTP request:
-                client.println(str_cat);
-                client.println("Host: www.google.com");
-                client.println("Connection: close");
-                client.println();
-              } 
-              
-              
-              
-               sprintf(test, "%s%d", "a", actions_nr);
-              
-               actions_nr = 0; 
-               actions_contor = 0;
-               length_str = 0;               
-              
-               
-              }
-            }
-           }else{
+              }   
+           }  
             
            length_str = 0;
              
@@ -250,9 +185,8 @@
             memset(get,0,sizeof(get));
             memset(mychar2,0,sizeof(mychar2));
               
-            break;
-        
-           }
+           
+           
   
          }
         }
@@ -263,4 +197,3 @@
     
 
    }
-
