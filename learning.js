@@ -1,11 +1,12 @@
 var ml = require('machine_learning');
 var http = require('http');
 var url = require('url');
-var request = require("request");
+var make_req = require("request");
  
 var array_habbits = [];
 var array_data = []; //possible habbits
 var array_results = [];
+var get_param = '';
 
 //Lets define a port we want to listen to
 const PORT=8080; 
@@ -40,18 +41,23 @@ function getKey(data) {
 		
 function handleRequest(request, response){
      params = url.parse(request.url,true);
-	 get_param = params.query.data.substring(1);
-	 
+	 get_param += params.query.data;
+	 if(get_param.length <= 1 || (get_param != '3' || get_param != '2'))  response.end('<html><head><link rel="shortcut icon" href="data:image/x-icon;," type="image/x-icon"></head><body>1</body></html>');
 
+	 
 if(get_param.length == 3){
 	var array = [get_param[0],get_param[1],get_param[2]];   
 	
+	get_param = '';
+	
 	if(check_habbit(array))
 	{
+		console.log('Habbit already exists');
 		response.end('<html><head><link rel="shortcut icon" href="data:image/x-icon;," type="image/x-icon"></head><body>1</body></html>');
 	    return;
 	}
 	if(get_length(array_data) > 0){
+	console.log('habbit added');
 	for(var i = 0;i<=get_length(array_data);i++){
 		if(typeof array_data[i] !== 'undefined')
 		{
@@ -69,15 +75,21 @@ if(get_param.length == 3){
 } 
 else
  array_data.push(array);	
-    
+   get_param = '';
    //console.log(array_habbits);   // console.log(array_results);   
- 
+   console.log('pushed to data array');
+   console.log(array_data);
    response.end('<html><head><link rel="shortcut icon" href="data:image/x-icon;," type="image/x-icon"></head><body>It Works!! Path Hit: ' + request.url+ "</body></html>");
 }
 else{
 if(get_param.length == 2)
 {
+if(array_habbits.length == 0){
+	
+response.end('<html><head><link rel="shortcut icon" href="data:image/x-icon;," type="image/x-icon"></head><body>1</body></html>');
 
+	return;
+}
 if(get_length(array_results) == 1){
 	array_results.push('x');
 	array_results.push('x');
@@ -101,6 +113,7 @@ dt.build();
 dt.print();
  
 var classify =  dt.classify([get_param[0],get_param[1]]);
+
  
  // debugger
  for(var i =0;i<=get_length(array_habbits);i++)
@@ -109,11 +122,12 @@ var classify =  dt.classify([get_param[0],get_param[1]]);
  
 var key = getKey(classify);
  
- 
-request("192.168.1.177?"+key, function(error, response, body) {
+
+make_req("192.168.1.177?"+key, function(error, response, body) {
   console.log(body);
 });
- 
+	
+
 response.end('<html><head><link rel="shortcut icon" href="data:image/x-icon;," type="image/x-icon"></head><body>'+getKey(classify)+'</body></html>');
 
 }
